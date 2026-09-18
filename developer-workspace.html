@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Developer Workspace</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{
+  --bg:#0c1116; --panel:#121922; --panel2:#161f2a; --line:#232e3b;
+  --text:#dbe4ee; --muted:#7d8ea3; --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --ok:#3fb950; --warn:#e3b341; --err:#f85149; --accent:#58a6ff;
+}
+:root:not([data-theme="light"]){ }
+:root[data-theme="light"]{
+  --bg:#f4f6f8; --panel:#ffffff; --panel2:#eef1f4; --line:#dde3ea;
+  --text:#1b2531; --muted:#5c6b7f;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f4f6f8; --panel:#ffffff; --panel2:#eef1f4; --line:#dde3ea;
+    --text:#1b2531; --muted:#5c6b7f;
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;
+  border-bottom:1px solid var(--line);background:var(--panel);gap:16px;flex-wrap:wrap;}
+header h1{font-size:15px;margin:0;font-weight:600;letter-spacing:.2px;}
+header h1 span{color:var(--muted);font-weight:400;}
+.head-right{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:12.5px;color:var(--muted);}
+.sys-badge{display:flex;align-items:center;gap:6px;color:var(--text);}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none;}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(63,185,80,.15);}
+.dot.warn{background:var(--warn);box-shadow:0 0 0 3px rgba(227,179,65,.15);}
+.dot.err{background:var(--err);box-shadow:0 0 0 3px rgba(248,81,73,.15);}
+button{font:inherit;cursor:pointer;}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);
+  padding:6px 12px;border-radius:6px;font-size:12.5px;font-family:var(--mono);}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:600;}
+.btn.danger{border-color:var(--err);color:var(--err);}
+.shell{display:flex;min-height:calc(100vh - 52px);}
+nav{width:190px;flex:none;border-right:1px solid var(--line);background:var(--panel);padding:14px 0;}
+nav button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);
+  padding:9px 20px;font-size:13px;border-left:2px solid transparent;}
+nav button.active{color:var(--text);border-left-color:var(--accent);background:var(--panel2);}
+nav button:hover{color:var(--text);}
+main{flex:1;padding:22px;overflow-x:auto;}
+.view{display:none;}
+.view.active{display:block;}
+.view h2{font-size:15px;margin:0 0 14px;font-weight:600;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;}
+.card .ctitle{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.card .clabel{font-size:14px;font-weight:600;margin-bottom:10px;}
+.card .row{display:flex;justify-content:space-between;font-size:12.5px;font-family:var(--mono);
+  color:var(--muted);padding:3px 0;}
+.card .row b{color:var(--text);font-weight:500;}
+.card .stat{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;margin-bottom:10px;}
+.card.err{border-color:var(--err);}
+.card .actions{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;overflow:hidden;font-size:13px;}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);}
+th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.05em;}
+tr:last-child td{border-bottom:none;}
+.pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:12px;}
+.section{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:14px;}
+.section h3{margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+select,input{background:var(--panel2);border:1px solid var(--line);color:var(--text);
+  padding:6px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;}
+.log-line{font-family:var(--mono);font-size:12.5px;padding:4px 0;border-bottom:1px solid var(--line);
+  display:flex;gap:10px;}
+.log-line .lvl{width:60px;flex:none;}
+.lvl.INFO{color:var(--accent);} .lvl.WARNING{color:var(--warn);} .lvl.ERROR{color:var(--err);}
+.filters{display:flex;gap:6px;margin-bottom:10px;}
+.filters button.active{border-color:var(--accent);color:var(--accent);}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--ok);padding:10px 16px;border-radius:6px;font-size:13px;display:none;
+  box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.dialog-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;
+  justify-content:center;z-index:10;}
+.dialog{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px;width:320px;}
+.dialog h4{margin:0 0 8px;font-size:14px;}
+.dialog p{margin:0 0 16px;font-size:13px;color:var(--muted);}
+.dialog .drow{display:flex;justify-content:flex-end;gap:8px;}
+.muted{color:var(--muted);font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Industrial AI Platform <span>— Developer Workspace</span></h1>
+  <div class="head-right">
+    <span>INDUSTRY: <b id="industryLabel" style="color:var(--text)">Electronics/PCB</b></span>
+    <span class="sys-badge"><span class="dot ok" id="sysDot"></span><span id="sysLabel">SYSTEM: HEALTHY</span></span>
+    <button class="btn" onclick="refreshAll()">Refresh</button>
+  </div>
+</header>
+
+<div class="shell">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="dialog-backdrop" id="dialogBackdrop">
+  <div class="dialog">
+    <h4 id="dTitle"></h4>
+    <p id="dBody"></p>
+    <div class="drow">
+      <button class="btn" onclick="closeDialog()">Cancel</button>
+      <button class="btn danger" id="dConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- mock backend state (interface layer — replace with real API calls) ----
+const state = {
+  industry: "Electronics/PCB",
+  layers: {
+    l1: {name:"Layer 1 — Data Acquisition", status:"ok", mqtt:"Connected", sensors:"Streaming", last:"2s ago"},
+    l2a:{name:"Layer 2A — ANN Fault Detection", status:"ok", model:"ann_fault_model.pkl", version:"v1.2", last:"3s ago"},
+    l2b:{name:"Layer 2B — ML Machine Health", status:"warn", model:"machine_health_model.pkl", version:"v2.1", last:"15s ago"},
+    l3: {name:"Layer 3 — Digital Twin", status:"ok", twin:"Synced", last:"2s ago", line:"Line A"},
+    whatif:{name:"What-if Simulation", status:"ok", last:"1m ago", simState:"Idle"},
+    l4: {name:"Layer 4 — Decision & Recovery", status:"err", engine:"Offline", lastDecision:"02:31:42",
+         lastRecovery:"—", error:"Recovery service connection failed"},
+    api:{name:"Main Backend API", status:"ok", last:"1s ago"}
+  },
+  services: [
+    {name:"MQTT", status:"ok", last:"2s ago"},
+    {name:"Sensor Stream", status:"ok", last:"1s ago"},
+    {name:"ANN Service", status:"ok", last:"3s ago"},
+    {name:"ML Service", status:"warn", last:"15s ago"},
+    {name:"Digital Twin", status:"ok", last:"2s ago"},
+    {name:"Recovery Engine", status:"err", last:"—"},
+    {name:"API", status:"ok", last:"1s ago"}
+  ],
+  apis: [
+    {name:"Layer 1 API", status:"ok", resp:"42ms", last:"2s ago"},
+    {name:"ANN API", status:"ok", resp:"88ms", last:"3s ago"},
+    {name:"ML API", status:"warn", resp:"640ms", last:"15s ago"},
+    {name:"Digital Twin API", status:"ok", resp:"55ms", last:"2s ago"},
+    {name:"What-if API", status:"ok", resp:"70ms", last:"1m ago"},
+    {name:"Recovery API", status:"err", resp:"—", last:"—"},
+    {name:"Main Backend API", status:"ok", resp:"30ms", last:"1s ago"}
+  ],
+  logs: [
+    {t:"02:35:12", lvl:"INFO", msg:"MQTT sensor stream connected"},
+    {t:"02:35:15", lvl:"INFO", msg:"ANN prediction completed"},
+    {t:"02:35:18", lvl:"INFO", msg:"Machine M03 health updated"},
+    {t:"02:35:21", lvl:"WARNING", msg:"ML service response delayed"},
+    {t:"02:35:24", lvl:"INFO", msg:"Digital Twin synchronized"},
+    {t:"02:35:29", lvl:"ERROR", msg:"Recovery service connection failed"}
+  ],
+  configs: {
+    "Electronics/PCB": {
+      machines: [["M01","SMT Placer","30s","Available"],["M02","Reflow Oven","95s","Available"],
+                 ["M03","AOI Inspector","20s","Available"]],
+      sensors: [["S01","Temperature","Reflow Oven"],["S02","Vibration","SMT Placer"]]
+    },
+    "Automobile": {
+      machines: [["A01","Weld Robot","45s","Available"],["A02","Paint Booth","120s","Maintenance"],
+                 ["A03","Assembly Arm","60s","Available"]],
+      sensors: [["S01","Torque","Weld Robot"],["S02","Pressure","Paint Booth"]]
+    }
+  },
+  models: {
+    ann: {name:"ANN Fault Detection", model:"ann_fault_model.pkl", version:"v1.2", status:"Active", loaded:"08:12:03"},
+    ml:  {name:"ML Machine Health", model:"machine_health_model.pkl", version:"v2.1", status:"Active", loaded:"08:12:05"}
+  }
+};
+
+const dot = s => `<span class="dot ${s}"></span>`;
+const statusWord = s => ({ok:"Healthy",warn:"Warning",err:"Offline"}[s]);
+function overallStatus(){
+  const vals = Object.values(state.layers).map(l=>l.status);
+  if(vals.includes("err")) return "err";
+  if(vals.includes("warn")) return "warn";
+  return "ok";
+}
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.display='block';
+  clearTimeout(window._tt); window._tt = setTimeout(()=>el.style.display='none', 2400);
+}
+function confirmDialog(title, body, onConfirm){
+  document.getElementById('dTitle').textContent = title;
+  document.getElementById('dBody').textContent = body;
+  const btn = document.getElementById('dConfirm');
+  btn.onclick = ()=>{ closeDialog(); onConfirm(); };
+  document.getElementById('dialogBackdrop').style.display='flex';
+}
+function closeDialog(){ document.getElementById('dialogBackdrop').style.display='none'; }
+
+function restartService(name){
+  confirmDialog(`Restart ${name}?`, `This will temporarily stop ${name} operations.`, ()=>{
+    toast(`${name} restarting…`);
+    setTimeout(()=>toast(`${name} restarted`), 900);
+  });
+}
+function reloadModel(which){
+  toast(`Reloading ${which} model…`);
+  setTimeout(()=>toast(`${which} model reloaded`), 900);
+}
+function healthCheck(name){ toast(`Health check: ${name} — OK`); }
+
+// ---- render ----
+const NAV = ["Overview","System Health","Industry Configuration","Model Management","Logs","API / Services"];
+let activeNav = "Overview";
+let logFilter = "All";
+
+function renderNav(){
+  document.getElementById('nav').innerHTML = NAV.map(n=>
+    `<button class="${n===activeNav?'active':''}" onclick="setView('${n}')">${n}</button>`).join('');
+}
+function setView(n){ activeNav=n; render(); }
+
+function layerCard(key,l){
+  const err = l.status==="err";
+  let rows = "";
+  if(key==="l1") rows = `<div class="row">MQTT<b>${l.mqtt}</b></div><div class="row">Sensor stream<b>${l.sensors}</b></div><div class="row">Last data<b>${l.last}</b></div>`;
+  if(key==="l2a"||key==="l2b") rows = `<div class="row">Model<b>${l.model}</b></div><div class="row">Version<b>${l.version}</b></div><div class="row">Last prediction<b>${l.last}</b></div>`;
+  if(key==="l3") rows = `<div class="row">Twin status<b>${l.twin}</b></div><div class="row">Last sync<b>${l.last}</b></div><div class="row">Active line<b>${l.line}</b></div>`;
+  if(key==="whatif") rows = `<div class="row">Last simulation<b>${l.last}</b></div><div class="row">Current state<b>${l.simState}</b></div>`;
+  if(key==="l4") rows = `<div class="row">Recovery engine<b>${l.engine}</b></div><div class="row">Last decision<b>${l.lastDecision}</b></div><div class="row">Last recovery<b>${l.lastRecovery}</b></div>`;
+  if(key==="api") rows = `<div class="row">Response<b>OK</b></div><div class="row">Last request<b>${l.last}</b></div>`;
+  return `<div class="card ${err?'err':''}">
+    <div class="stat">${dot(l.status)} ${statusWord(l.status)}</div>
+    <div class="clabel">${l.name}</div>
+    ${rows}
+    ${err ? `<div class="muted" style="color:var(--err);margin-top:8px">${l.error||''}</div>
+      <div class="actions"><button class="btn" onclick="healthCheck('${l.name}')">Health Check</button>
+      <button class="btn danger" onclick="restartService('${l.name}')">Restart</button>
+      <button class="btn" onclick="setView('Logs')">View Logs</button></div>` : ""}
+  </div>`;
+}
+
+function viewOverview(){
+  return `<h2>Overview</h2><div class="grid">${Object.entries(state.layers).map(([k,l])=>layerCard(k,l)).join('')}</div>`;
+}
+function viewHealth(){
+  const rows = state.services.map(s=>`<tr><td>${s.name}</td>
+    <td class="pill">${dot(s.status)} ${statusWord(s.status)}</td><td>${s.last}</td>
+    <td><button class="btn" onclick="healthCheck('${s.name}')">Health Check</button></td></tr>`).join('');
+  return `<h2>System Health</h2><table><tr><th>Component</th><th>Status</th><th>Last Activity</th><th>Action</th></tr>${rows}</table>`;
+}
+function viewConfig(){
+  const cfg = state.configs[state.industry];
+  const mRows = cfg.machines.map(m=>`<tr><td>${m[0]}</td><td>${m[1]}</td><td>${m[2]}</td><td>${m[3]}</td></tr>`).join('');
+  const sRows = cfg.sensors.map(s=>`<tr><td>${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td></tr>`).join('');
+  return `<h2>Industry Configuration</h2>
+  <div class="section">
+    <h3>Active Industry</h3>
+    <select onchange="switchIndustry(this.value)">
+      ${Object.keys(state.configs).map(i=>`<option ${i===state.industry?'selected':''}>${i}</option>`).join('')}
+    </select>
+    <span class="muted" id="configStatus" style="margin-left:10px;color:var(--ok)">Configuration Applied ✓</span>
+  </div>
+  <div class="section"><h3>Machines</h3>
+    <table><tr><th>ID</th><th>Name</th><th>Processing Time</th><th>Availability</th></tr>${mRows}</table></div>
+  <div class="section"><h3>Sensors</h3>
+    <table><tr><th>ID</th><th>Type</th><th>Data Source</th></tr>${sRows}</table></div>
+  <div class="section"><h3>AI Configuration</h3>
+    <div class="row" style="font-family:var(--sans)"><span>ANN model</span><b>${state.models.ann.model}</b></div>
+    <div class="row" style="font-family:var(--sans)"><span>ML model</span><b>${state.models.ml.model}</b></div>
+  </div>`;
+}
+function switchIndustry(val){
+  state.industry = val;
+  document.getElementById('industryLabel').textContent = val;
+  render();
+  document.getElementById('configStatus').textContent = "Applying configuration…";
+  setTimeout(()=>{
+    const el = document.getElementById('configStatus');
+    if(el){ el.textContent = "Configuration Applied ✓"; el.style.color = "var(--ok)"; }
+    toast(`Switched active industry to ${val}`);
+  }, 700);
+}
+function modelCard(m,key){
+  return `<div class="card"><div class="clabel">${m.name}</div>
+    <div class="row">Model<b>${m.model}</b></div>
+    <div class="row">Version<b>${m.version}</b></div>
+    <div class="row">Status<b style="color:var(--ok)">${m.status}</b></div>
+    <div class="row">Last loaded<b>${m.loaded}</b></div>
+    <div class="actions">
+      <button class="btn" onclick="reloadModel('${key}')">Reload Model</button>
+      <button class="btn" onclick="toast('Model info: ${m.model} (${m.version})')">View Info</button>
+      <button class="btn" onclick="toast('Replace Model: select a file to begin validation')">Replace Model</button>
+    </div></div>`;
+}
+function viewModels(){
+  return `<h2>Model Management</h2><div class="grid">${modelCard(state.models.ann,'ann')}${modelCard(state.models.ml,'ml')}</div>`;
+}
+function viewLogs(){
+  const filtered = state.logs.filter(l=>logFilter==="All"||l.lvl===logFilter.toUpperCase());
+  const lines = filtered.map(l=>`<div class="log-line"><span class="muted">${l.t}</span><span class="lvl ${l.lvl}">${l.lvl}</span><span>${l.msg}</span></div>`).join('');
+  return `<h2>Logs</h2>
+  <div class="filters">${["All","Info","Warning","Error"].map(f=>
+    `<button class="btn ${logFilter===f?'active':''}" onclick="setLogFilter('${f}')">${f}</button>`).join('')}
+    <button class="btn" onclick="toast('Logs cleared')" style="margin-left:auto">Clear</button>
+    <button class="btn" onclick="refreshAll()">Refresh</button></div>
+  <div class="section">${lines || '<span class="muted">No log entries for this filter.</span>'}</div>`;
+}
+function setLogFilter(f){ logFilter=f; render(); }
+function viewApis(){
+  const rows = state.apis.map(a=>`<tr><td>${a.name}</td><td class="pill">${dot(a.status)} ${statusWord(a.status)}</td>
+    <td>${a.resp}</td><td>${a.last}</td><td><button class="btn" onclick="healthCheck('${a.name}')">Health Check</button></td></tr>`).join('');
+  return `<h2>API / Services</h2><table><tr><th>Service</th><th>Status</th><th>Response Time</th><th>Last Success</th><th>Action</th></tr>${rows}</table>`;
+}
+
+function render(){
+  renderNav();
+  const map = {"Overview":viewOverview,"System Health":viewHealth,"Industry Configuration":viewConfig,
+    "Model Management":viewModels,"Logs":viewLogs,"API / Services":viewApis};
+  document.getElementById('main').innerHTML = `<div class="view active">${map[activeNav]()}</div>`;
+  const os = overallStatus();
+  document.getElementById('sysDot').className = `dot ${os}`;
+  document.getElementById('sysLabel').textContent = `SYSTEM: ${statusWord(os).toUpperCase()}`;
+}
+function refreshAll(){ toast("Status refreshed"); render(); }
+
+render();
+</script>
+</body>
+</html>
